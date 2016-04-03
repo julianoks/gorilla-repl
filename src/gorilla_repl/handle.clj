@@ -37,10 +37,18 @@
   ;; TODO: error handling!
   (when-let [ws-data (:worksheet-data (:params req))]
     (when-let [ws-file (:worksheet-filename (:params req))]
-      (print (str "Saving: " ws-file " ... "))
-      (spit ws-file ws-data)
-      (println (str "done. [" (java.util.Date.) "]"))
-      (res/response {:status "ok"}))))
+      ;;(spit (clojure.java.io/file "/Users/julian/Desktop/hello.txt") req)
+      (let [marked-down-data (apply str (interpose "\n" (filter
+                                                          #(and (> (count %) 1) (not= ";;" (subs % 0 2)))
+                                                          (clojure.string/split ws-data #"\n"))))
+            marked-down-file (str ws-file ".clj")]
+        (print (str "Saving: " marked-down-file " ... "))
+        (spit marked-down-file marked-down-data)
+        (println (str "done. [" (java.util.Date.) "]"))
+        (print (str "Saving: " ws-file " ... "))
+        (spit ws-file ws-data)
+        (println (str "done. [" (java.util.Date.) "]"))
+        (res/response {:status "ok"})))))
 
 ;; More ugly atom usage to support defroutes
 (def ^:private excludes (atom #{".git"}))
